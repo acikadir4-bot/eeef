@@ -29,6 +29,13 @@
   status = 200
   force = true
 
+# Dynamic Job Sitemap - MUST be before any wildcard redirects
+[[redirects]]
+  from = "/sitemap-jobs.xml"
+  to = "/.netlify/functions/sitemap-jobs"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
