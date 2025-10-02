@@ -70,28 +70,39 @@ export function generateMetaTags(options: {
       existingScript.remove();
     }
 
+    // Açıklamayı temizle ve minimum 200 karakter garantisi
+    const cleanDescription = (jobData.description || "İş tanımı")
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const fullDescription = cleanDescription.length < 200
+      ? cleanDescription + " Detaylı bilgi için ilan sayfasını ziyaret edin. Bu pozisyon için hemen başvurun ve kariyerinize yeni bir yön verin."
+      : cleanDescription;
+
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "JobPosting",
-      
+
       // ✅ ZORUNLU ALANLAR - Google'ın istediği
       "title": jobData.title || "İş İlanı",
-      "description": jobData.description || "İş tanımı",
+      "description": fullDescription.substring(0, 2000),
       "datePosted": new Date(jobData.createdAt).toISOString(), // ✅ ISO 8601 formatı
-      
-      // ✅ hiringOrganization - ZORUNLU
+
+      // ✅ hiringOrganization - ZORUNLU (daha detaylı)
       "hiringOrganization": {
         "@type": "Organization",
         "name": jobData.company || "İşveren",
-        "url": "https://isilanlarim.org"
+        "sameAs": "https://isilanlarim.org",
+        "logo": "https://isilanlarim.org/logo.png"
       },
-      
+
       // ✅ jobLocation - ZORUNLU
       "jobLocation": {
         "@type": "Place",
         "address": {
           "@type": "PostalAddress",
-          "addressLocality": jobData.location || "Türkiye", // ✅ addressLocality eklendi
+          "addressLocality": jobData.location || "Türkiye",
+          "addressRegion": jobData.location || "Türkiye",
           "addressCountry": "TR"
         }
       },

@@ -169,7 +169,6 @@ export function HomePage() {
           onCategorySelect={(category) => updateFilters({ category, subCategory: '' })}
           availableCategories={categories}
           updateFilters={updateFilters}
-          updateFilters={updateFilters}
         />
       </div>
 

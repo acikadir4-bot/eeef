@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Calendar, Clock, User, MessageCircle, Heart, Share2, Tag, TrendingUp, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Calendar, Clock, User, MessageCircle, Heart, Share2, Tag, TrendingUp, Sparkles, PenLine } from 'lucide-react';
 import { blogService, BlogPost } from '../../services/blogService';
 import { formatDate, getTimeAgo } from '../../utils/dateUtils';
 import { Button } from '../ui/Button';
 
 export function BlogPage() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -58,10 +59,17 @@ export function BlogPage() {
           <Sparkles className="h-8 w-8 text-blue-600" />
           İşBuldum Blog - Kariyer Rehberi
         </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          AI destekli kariyer tavsiyeleri, iş arama stratejileri ve güncel iş piyasası analizleri. 
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-6">
+          AI destekli kariyer tavsiyeleri, iş arama stratejileri ve güncel iş piyasası analizleri.
           Her gün yeni içerik, uzman yorumları ve pratik rehberler.
         </p>
+        <button
+          onClick={() => navigate('/blog/yeni')}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+        >
+          <PenLine className="h-5 w-5" />
+          <span className="font-medium">Blog Yazısı Paylaş</span>
+        </button>
       </div>
 
       {/* Categories */}

@@ -210,32 +210,41 @@ Sadece yanıt metnini döndür, JSON formatında değil.
     }
   }
 
-  // Canlı destek için AI yanıtı
-  async generateLiveSupportResponse(userMessage: string): Promise<string> {
+  // Canlı destek için AI yanıtı - Site bağlamına göre optimize
+  async generateLiveSupportResponse(userMessage: string, currentUrl?: string): Promise<string> {
     try {
       const prompt = `
-Sen İşBuldum platformunun canlı destek AI asistanısın. Kullanıcının sorusuna yanıt ver.
+Sen İşBuldum platformunun canlı destek AI asistanısın. Kullanıcının sorusuna BAĞLAMINA GÖRE yanıt ver.
 
 KULLANICI SORUSU: "${userMessage}"
+${currentUrl ? `KULLANICININ BULUNDUĞU SAYFA: ${currentUrl}` : ''}
 
 YANIT KURALLARI:
 1. ÇOK KISA VE NET (15-40 kelime MAX)
-2. Hemen çözüm odaklı
-3. Tek cümle tercih et
-4. Emoji kullan (1-2 adet)
-5. AI olduğunu kısa belirt
-6. Mobil kullanıcı için optimize
+2. Hemen çözüm odaklı ve kullanıcının bulunduğu sayfaya özel
+3. Link veya yönlendirme içeren pratik çözüm
+4. Emoji kullan (1 adet)
+5. Mobil kullanıcı için optimize
 
 PLATFORM ÖZELLİKLERİ:
-- Ücretsiz iş ilanı verme
+- İşBuldum: 50.000+ güncel iş ilanı
+- Ücretsiz ilan verme
 - CV oluşturma aracı
-- 50.000+ güncel ilan
-- Tüm Türkiye kapsamı
+- Blog ve kariyer rehberleri
+- Tüm kategorilerde iş fırsatları
 
-ÖRNEK YANITLAR:
-"🤖 İş aramak için ana sayfada filtreleri kullanın"
-"📄 CV oluşturmak için /cv-olustur sayfasına gidin"
-"💼 Ücretsiz ilan vermek için kayıt olun"
+ÖZEL DURUMLAR:
+- İş arıyor: "🔍 Ana sayfada şehir ve kategori filtrelerini kullanın"
+- CV sorusu: "📄 /cv-olustur adresine gidin, AI yardımı ile CV hazırlayın"
+- İlan verme: "💼 Sağ üst köşeden 'İlan Ver' butonuna tıklayın"
+- Blog sorusu: "📚 /blog sayfasında kariyer rehberlerimizi okuyun"
+- Kategori sorusu: "🎯 Ana sayfadan ilgilendiğiniz kategoriyi seçin"
+- Şehir sorusu: "📍 Arama barından şehir filtresi uygulayın"
+
+ÖRNEK YANITLAR (BAĞLAMA GÖRE):
+- Ana sayfa: "🔍 Yukarıdaki arama çubuğundan iş arayabilirsiniz"
+- İlan detay: "✅ 'Başvur' butonuna tıklayarak hemen başvurun"
+- Blog: "📚 İlgili kategori butonlarından filtreleme yapabilirsiniz"
 
 Sadece kısa yanıt metnini döndür, açıklama yapma.
 `;
@@ -298,11 +307,12 @@ Sadece kısa yanıt metnini döndür, açıklama yapma.
   async handleLiveSupportMessage(
     userName: string,
     message: string,
-    userId?: string
+    userId?: string,
+    currentUrl?: string
   ): Promise<LiveChatMessage> {
     try {
-      // AI yanıtı oluştur
-      const aiResponse = await this.generateLiveSupportResponse(message);
+      // AI yanıtı oluştur (sayfa bağlamı ile)
+      const aiResponse = await this.generateLiveSupportResponse(message, currentUrl);
 
       const chatMessage: Omit<LiveChatMessage, 'id'> = {
         userId,

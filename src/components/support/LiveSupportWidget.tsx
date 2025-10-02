@@ -85,7 +85,8 @@ export function LiveSupportWidget() {
       const newMessage = await blogService.handleLiveSupportMessage(
         userName,
         userMessage,
-        user?.id
+        user?.id,
+        window.location.pathname
       );
 
       // Mesajları güncelle
