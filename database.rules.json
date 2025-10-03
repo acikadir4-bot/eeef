@@ -52,6 +52,32 @@
     "admin_settings": {
       ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
       ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "blog_posts": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["createdAt", "category", "author"],
+      "$postId": {
+        ".read": true,
+        ".write": "auth != null && ((!data.exists()) || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".validate": "newData.hasChildren(['title', 'content', 'author', 'createdAt', 'category'])"
+      }
+    },
+    "blog_comments": {
+      "$postId": {
+        ".read": true,
+        ".write": "auth != null",
+        "$commentId": {
+          ".validate": "newData.hasChildren(['userName', 'content', 'createdAt'])"
+        }
+      }
+    },
+    "live_support": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null",
+      "$messageId": {
+        ".validate": "newData.hasChildren(['userName', 'message', 'timestamp'])"
+      }
     }
   }
 }
