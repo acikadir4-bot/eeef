@@ -115,44 +115,28 @@ export function JobCard({ job, onDeleted }: JobCardProps) {
                   <Building2 className="h-6 w-6 text-red-600" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-bold text-gray-700 mb-1" itemProp="hiringOrganization">{job.company}</div>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <MapPin className="h-3 w-3" />
                     <span itemProp="jobLocation">{job.location}</span>
                     <span className="text-gray-300">•</span>
                     <span itemProp="employmentType">{job.type}</span>
-                    {job.salary && (
-                      <>
-                        <span className="text-gray-300">•</span>
-                        <span className="text-green-600 font-bold">{job.salary}</span>
-                      </>
-                    )}
                   </div>
                 </div>
               </div>
               
-              <h2 
-                className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors leading-tight line-clamp-2 mb-3 cursor-pointer"
+              <h2
+                className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors leading-snug mb-3 cursor-pointer break-words"
                 itemProp="title"
+                style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
               >
                 {job.title}
               </h2>
               
               {/* CTR artırıcı özellikler */}
               <div className="flex flex-wrap gap-2 mb-3">
-                {job.salary && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
-                    <DollarSign className="h-3 w-3" />
-                    {job.salary}
-                  </span>
-                )}
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
                   <Clock className="h-3 w-3" />
                   HEMEN BAŞVUR
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
-                  <Star className="h-3 w-3" />
-                  SGK + PRİM
                 </span>
               </div>
             </div>

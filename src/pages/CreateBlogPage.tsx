@@ -74,17 +74,29 @@ export function CreateBlogPage() {
       return;
     }
 
-    if (formData.content.length < 200) {
-      toast.error('İçerik en az 200 karakter olmalıdır');
+    if (formData.content.length < 800) {
+      toast.error('İçerik en az 800 karakter olmalıdır (SEO için uzun içerik önerilir)');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      // İçeriğe otomatik ana sayfa linkleri ekle
+      const contentWithLinks = formData.content +
+        `\n\n---\n\n<div style="background: #f0f9ff; padding: 20px; border-radius: 10px; margin: 20px 0;">\n` +
+        `<h3 style="color: #1e40af; margin-bottom: 10px;">🔍 İş Arıyor musunuz?</h3>\n` +
+        `<p style="margin-bottom: 15px;"><strong><a href="/" style="color: #2563eb;">İşBuldum platformunda 50.000+ güncel iş ilanını keşfedin!</a></strong></p>\n` +
+        `<ul style="list-style: none; padding: 0;">\n` +
+        `<li>✅ <a href="/istanbul-is-ilanlari" style="color: #2563eb;">İstanbul İş İlanları</a></li>\n` +
+        `<li>✅ <a href="/ankara-is-ilanlari" style="color: #2563eb;">Ankara İş İlanları</a></li>\n` +
+        `<li>✅ <a href="/remote-is-ilanlari" style="color: #2563eb;">Uzaktan Çalışma İlanları</a></li>\n` +
+        `<li>✅ <a href="/" style="color: #2563eb;">Tüm İlanları Gör</a></li>\n` +
+        `</ul>\n</div>`;
+
       const blogPost: Omit<BlogPost, 'id'> = {
         title: formData.title,
-        content: formData.content,
+        content: contentWithLinks,
         excerpt: formData.excerpt || formData.content.substring(0, 150) + '...',
         slug: generateSlug(formData.title),
         category: formData.category,
@@ -99,18 +111,25 @@ export function CreateBlogPage() {
         comments: []
       };
 
+      console.log('Blog yazısı kaydediliyor:', blogPost);
+
       const blogRef = ref(db, 'blog_posts');
       const newPostRef = await push(blogRef, blogPost);
+
+      console.log('Blog yazısı başarıyla kaydedildi:', newPostRef.key);
 
       toast.success('Blog yazınız başarıyla yayınlandı!', {
         duration: 4000,
         icon: '🎉'
       });
 
-      navigate('/blog');
-    } catch (error) {
+      // Biraz bekle ve yönlendir
+      setTimeout(() => {
+        navigate('/blog');
+      }, 1000);
+    } catch (error: any) {
       console.error('Blog yazısı oluşturma hatası:', error);
-      toast.error('Blog yazısı yayınlanırken bir hata oluştu');
+      toast.error(`Hata: ${error.message || 'Blog yazısı yayınlanamıyor. Firebase kurallarını kontrol edin.'}`);
     } finally {
       setIsSubmitting(false);
     }
