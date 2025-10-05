@@ -22,45 +22,70 @@ export function BlogPostPage() {
 
   useEffect(() => {
     const loadPost = async () => {
-      if (!slug) return;
+      if (!slug) {
+        console.log('Slug bulunamadı');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Blog yazısı yükleniyor, slug:', slug);
 
       try {
         // Blog yazısını slug ile bul
         const postsRef = ref(db, 'blog_posts');
         const snapshot = await get(postsRef);
-        
+
+        console.log('Firebase snapshot:', snapshot.exists());
+
         if (snapshot.exists()) {
           const posts = snapshot.val();
-          const foundPost = Object.entries(posts).find(([id, data]: [string, any]) => 
-            data.slug === slug
-          );
+          console.log('Bulunan postlar:', Object.keys(posts || {}));
+
+          const foundPost = Object.entries(posts).find(([id, data]: [string, any]) => {
+            console.log('Kontrol edilen post slug:', data.slug, 'Aranan:', slug);
+            return data.slug === slug;
+          });
 
           if (foundPost) {
             const [postId, postData] = foundPost;
             const blogPost = { id: postId, ...postData } as BlogPost;
+            console.log('Blog yazısı bulundu:', blogPost.title);
             setPost(blogPost);
 
             // Görüntülenme sayısını artır
-            await update(ref(db, `blog_posts/${postId}`), {
-              views: (blogPost.views || 0) + 1
-            });
+            try {
+              await update(ref(db, `blog_posts/${postId}`), {
+                views: (blogPost.views || 0) + 1
+              });
+            } catch (updateError) {
+              console.error('Görüntülenme güncellenemedi:', updateError);
+            }
 
             // Yorumları yükle
-            const commentsRef = ref(db, `blog_comments/${postId}`);
-            const commentsSnapshot = await get(commentsRef);
-            
-            if (commentsSnapshot.exists()) {
-              const commentsData = Object.entries(commentsSnapshot.val()).map(([id, data]) => ({
-                id,
-                ...data
-              })) as BlogComment[];
-              
-              setComments(commentsData.sort((a, b) => a.createdAt - b.createdAt));
+            try {
+              const commentsRef = ref(db, `blog_comments/${postId}`);
+              const commentsSnapshot = await get(commentsRef);
+
+              if (commentsSnapshot.exists()) {
+                const commentsData = Object.entries(commentsSnapshot.val()).map(([id, data]) => ({
+                  id,
+                  ...data
+                })) as BlogComment[];
+
+                setComments(commentsData.sort((a, b) => a.createdAt - b.createdAt));
+              }
+            } catch (commentsError) {
+              console.error('Yorumlar yüklenemedi:', commentsError);
             }
+          } else {
+            console.log('Blog yazısı bulunamadı, slug eşleşmedi');
           }
+        } else {
+          console.log('Firebase\'de hiç blog yazısı yok');
         }
       } catch (error) {
         console.error('Blog yazısı yüklenirken hata:', error);
+        toast.error('Blog yazısı yüklenemedi. Lütfen daha sonra tekrar deneyin.');
       } finally {
         setLoading(false);
       }
