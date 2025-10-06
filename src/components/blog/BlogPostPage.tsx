@@ -23,68 +23,79 @@ export function BlogPostPage() {
   useEffect(() => {
     const loadPost = async () => {
       if (!slug) {
-        console.log('Slug bulunamadı');
+        console.error('❌ Slug bulunamadı!');
         setLoading(false);
+        toast.error('Blog yazısı bulunamadı');
         return;
       }
 
-      console.log('Blog yazısı yükleniyor, slug:', slug);
+      console.log('📖 Blog yazısı yükleniyor, slug:', slug);
 
       try {
         // Blog yazısını slug ile bul
         const postsRef = ref(db, 'blog_posts');
         const snapshot = await get(postsRef);
 
-        console.log('Firebase snapshot:', snapshot.exists());
+        if (!snapshot.exists()) {
+          console.error('❌ Firebase\'de hiç blog yazısı yok!');
+          setLoading(false);
+          toast.error('Henüz blog yazısı eklenmemiş');
+          return;
+        }
 
-        if (snapshot.exists()) {
-          const posts = snapshot.val();
-          console.log('Bulunan postlar:', Object.keys(posts || {}));
+        const posts = snapshot.val();
+        const postCount = Object.keys(posts || {}).length;
+        console.log(`📚 Firebase'de ${postCount} blog yazısı bulundu`);
 
-          const foundPost = Object.entries(posts).find(([id, data]: [string, any]) => {
-            console.log('Kontrol edilen post slug:', data.slug, 'Aranan:', slug);
-            return data.slug === slug;
+        // Tüm slug'ları listele
+        const allSlugs = Object.values(posts).map((p: any) => p.slug);
+        console.log('📝 Mevcut slug\'lar:', allSlugs);
+
+        const foundPost = Object.entries(posts).find(([id, data]: [string, any]) => {
+          return data.slug === slug;
+        });
+
+        if (!foundPost) {
+          console.error('❌ Blog yazısı bulunamadı! Slug eşleşmedi:', slug);
+          console.error('🔍 Aranan slug:', slug);
+          console.error('📝 Mevcut slug\'lar:', allSlugs);
+          setLoading(false);
+          toast.error(`"${slug}" slug'ına sahip blog yazısı bulunamadı`);
+          return;
+        }
+
+        const [postId, postData] = foundPost;
+        const blogPost = { id: postId, ...postData } as BlogPost;
+        console.log('✅ Blog yazısı bulundu:', blogPost.title);
+        setPost(blogPost);
+
+        // Görüntülenme sayısını artır
+        try {
+          await update(ref(db, `blog_posts/${postId}`), {
+            views: (blogPost.views || 0) + 1
           });
+        } catch (updateError) {
+          console.error('⚠️ Görüntülenme güncellenemedi:', updateError);
+        }
 
-          if (foundPost) {
-            const [postId, postData] = foundPost;
-            const blogPost = { id: postId, ...postData } as BlogPost;
-            console.log('Blog yazısı bulundu:', blogPost.title);
-            setPost(blogPost);
+        // Yorumları yükle
+        try {
+          const commentsRef = ref(db, `blog_comments/${postId}`);
+          const commentsSnapshot = await get(commentsRef);
 
-            // Görüntülenme sayısını artır
-            try {
-              await update(ref(db, `blog_posts/${postId}`), {
-                views: (blogPost.views || 0) + 1
-              });
-            } catch (updateError) {
-              console.error('Görüntülenme güncellenemedi:', updateError);
-            }
+          if (commentsSnapshot.exists()) {
+            const commentsData = Object.entries(commentsSnapshot.val()).map(([id, data]) => ({
+              id,
+              ...data
+            })) as BlogComment[];
 
-            // Yorumları yükle
-            try {
-              const commentsRef = ref(db, `blog_comments/${postId}`);
-              const commentsSnapshot = await get(commentsRef);
-
-              if (commentsSnapshot.exists()) {
-                const commentsData = Object.entries(commentsSnapshot.val()).map(([id, data]) => ({
-                  id,
-                  ...data
-                })) as BlogComment[];
-
-                setComments(commentsData.sort((a, b) => a.createdAt - b.createdAt));
-              }
-            } catch (commentsError) {
-              console.error('Yorumlar yüklenemedi:', commentsError);
-            }
-          } else {
-            console.log('Blog yazısı bulunamadı, slug eşleşmedi');
+            setComments(commentsData.sort((a, b) => a.createdAt - b.createdAt));
           }
-        } else {
-          console.log('Firebase\'de hiç blog yazısı yok');
+        } catch (commentsError) {
+          console.error('⚠️ Yorumlar yüklenemedi:', commentsError);
         }
       } catch (error) {
-        console.error('Blog yazısı yüklenirken hata:', error);
+        console.error('❌ Blog yazısı yüklenirken hata:', error);
         toast.error('Blog yazısı yüklenemedi. Lütfen daha sonra tekrar deneyin.');
       } finally {
         setLoading(false);
