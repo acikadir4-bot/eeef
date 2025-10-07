@@ -50,26 +50,42 @@ export function HomePage() {
       // State'i temizle
       window.history.replaceState({}, document.title);
     }
+  }, [pageNumber, location.state]);
 
-    // Scroll pozisyonunu geri yükle
-    const scrollPosition = sessionStorage.getItem('scrollPosition');
-    const previousPath = sessionStorage.getItem('previousPath');
-    
-    if (scrollPosition && previousPath && previousPath.includes(window.location.pathname)) {
-      setTimeout(() => {
-        window.scrollTo(0, parseInt(scrollPosition));
-        sessionStorage.removeItem('scrollPosition');
-        sessionStorage.removeItem('previousPath');
-      }, 100);
-    } else if (location.state?.scrollToTop) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Scroll pozisyonunu geri yükle - İlanlar yüklendikten SONRA
+  useEffect(() => {
+    if (!loading && jobs.length > 0) {
+      const scrollPosition = sessionStorage.getItem('scrollPosition');
+      const previousPath = sessionStorage.getItem('previousPath');
+      
+      if (scrollPosition && previousPath) {
+        // pathname kontrolü - search params olmadan karşılaştır
+        const currentPath = window.location.pathname;
+        const savedPath = previousPath.split('?')[0];
+        
+        if (currentPath === savedPath || previousPath.includes(currentPath)) {
+          // İçerik render olduktan sonra scroll yap
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              window.scrollTo({
+                top: parseInt(scrollPosition),
+                behavior: 'instant' // Anlık geçiş, smooth değil
+              });
+              sessionStorage.removeItem('scrollPosition');
+              sessionStorage.removeItem('previousPath');
+            }, 150);
+          });
+        }
+      } else if (location.state?.scrollToTop) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
 
     // Debug: İlan tarihlerini kontrol et
     if (jobs.length > 0) {
       checkJobDates(jobs);
     }
-  }, [pageNumber, location.state, jobs]);
+  }, [loading, jobs.length, location.state]);
 
   const getCategoryName = (categoryId: string) => {
     const category = jobCategories.find(c => c.id === categoryId);
