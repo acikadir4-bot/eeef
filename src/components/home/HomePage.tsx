@@ -58,24 +58,18 @@ export function HomePage() {
       const scrollPosition = sessionStorage.getItem('scrollPosition');
       const previousPath = sessionStorage.getItem('previousPath');
       
+      // sessionStorage temizle
+      sessionStorage.removeItem('scrollPosition');
+      sessionStorage.removeItem('previousPath');
+      
+      // İlan detayından dönülüyorsa, sayfanın başına git
       if (scrollPosition && previousPath) {
-        // pathname kontrolü - search params olmadan karşılaştır
-        const currentPath = window.location.pathname;
-        const savedPath = previousPath.split('?')[0];
-        
-        if (currentPath === savedPath || previousPath.includes(currentPath)) {
-          // İçerik render olduktan sonra scroll yap
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              window.scrollTo({
-                top: parseInt(scrollPosition),
-                behavior: 'instant' // Anlık geçiş, smooth değil
-              });
-              sessionStorage.removeItem('scrollPosition');
-              sessionStorage.removeItem('previousPath');
-            }, 150);
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
           });
-        }
+        }, 100);
       } else if (location.state?.scrollToTop) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
