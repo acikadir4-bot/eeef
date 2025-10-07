@@ -49,10 +49,10 @@ export function JobCard({ job, onDeleted }: JobCardProps) {
     toggleFavorite(job.id);
   };
 
-  // Şirket adının ilk harfini al veya icon göster
+  // Şirket adının ilk harfini al
   const companyInitial = job.company?.charAt(0).toUpperCase() || 'İ';
 
-  // Logo renkleri - rastgele ama tutarlı
+  // Logo renkleri
   const logoColors = [
     'from-blue-500 to-blue-600',
     'from-purple-500 to-purple-600',
@@ -66,95 +66,88 @@ export function JobCard({ job, onDeleted }: JobCardProps) {
 
   return (
     <article
-      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 ${
-        isPremium ? 'ring-2 ring-purple-200' : ''
-      }`}
+      className="bg-white border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer py-3 px-4"
       onClick={handleJobClick}
       itemScope
       itemType="https://schema.org/JobPosting"
     >
-      <div className="p-4">
-        {/* Header with Logo and Favorite */}
-        <div className="flex items-start gap-3 mb-3">
-          {/* Company Logo */}
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${logoColor} flex items-center justify-center flex-shrink-0 shadow-sm`}>
-            <span className="text-white font-bold text-lg">{companyInitial}</span>
-          </div>
+      <div className="flex items-start gap-3">
+        {/* Company Logo - Küçültülmüş */}
+        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${logoColor} flex items-center justify-center flex-shrink-0`}>
+          <span className="text-white font-semibold text-sm">{companyInitial}</span>
+        </div>
 
-          {/* Title and Company */}
-          <div className="flex-1 min-w-0">
+        {/* İçerik */}
+        <div className="flex-1 min-w-0">
+          {/* Başlık ve Favorileme */}
+          <div className="flex items-start justify-between gap-2 mb-1">
             <h2
-              className="text-base font-semibold text-gray-900 mb-1 line-clamp-2 leading-snug"
+              className="text-base font-semibold text-gray-900 line-clamp-2 leading-tight"
               itemProp="title"
             >
               {job.title}
+              {isPremium && (
+                <span className="ml-1.5 text-xs font-medium text-purple-600">👑</span>
+              )}
             </h2>
-            <div className="flex items-center gap-1 text-sm text-gray-600">
-              <Building2 className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">{job.company}</span>
+            
+            {/* Minimal Favori Butonu */}
+            <button
+              onClick={handleFavoriteClick}
+              className="p-1 -mt-1 flex-shrink-0"
+              aria-label={isFav ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+            >
+              {isFav ? (
+                <BookmarkCheck className="h-4 w-4 text-red-500 fill-current" />
+              ) : (
+                <Bookmark className="h-4 w-4 text-gray-300 hover:text-gray-400" />
+              )}
+            </button>
+          </div>
+
+          {/* Şirket */}
+          <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-2">
+            <Building2 className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">{job.company}</span>
+          </div>
+
+          {/* Alt Bilgiler */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+            {/* Konum */}
+            <div className="flex items-center gap-1">
+              <MapPin className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate" itemProp="jobLocation">{job.location}</span>
+            </div>
+
+            {/* İş Tipi */}
+            <div className="flex items-center gap-1">
+              <Briefcase className="h-3 w-3 flex-shrink-0" />
+              <span itemProp="employmentType">{job.type}</span>
+            </div>
+
+            {/* Deneyim */}
+            {job.experienceLevel && job.experienceLevel !== 'Deneyimsiz' && (
+              <div className="flex items-center gap-1">
+                <GraduationCap className="h-3 w-3 flex-shrink-0" />
+                <span>{job.experienceLevel}</span>
+              </div>
+            )}
+
+            {/* Tarih */}
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3 flex-shrink-0" />
+              <span>{getTimeAgo(job.createdAt)}</span>
             </div>
           </div>
 
-          {/* Favorite Button */}
-          <button
-            onClick={handleFavoriteClick}
-            className="p-2 hover:bg-gray-50 rounded-lg transition-colors flex-shrink-0"
-            aria-label={isFav ? 'Favorilerden çıkar' : 'Favorilere ekle'}
-          >
-            {isFav ? (
-              <BookmarkCheck className="h-5 w-5 text-red-600 fill-current" />
-            ) : (
-              <Bookmark className="h-5 w-5 text-gray-400" />
-            )}
-          </button>
-        </div>
-
-        {/* Job Info Tags */}
-        <div className="flex flex-wrap items-center gap-2 mb-3 text-xs text-gray-600">
-          <div className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="whitespace-nowrap">{getTimeAgo(job.createdAt)}</span>
-          </div>
-
-          <span className="text-gray-300">•</span>
-
-          <div className="flex items-center gap-1">
-            <Briefcase className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="whitespace-nowrap" itemProp="employmentType">{job.type}</span>
-          </div>
-
-          {job.experienceLevel && job.experienceLevel !== 'Deneyimsiz' && (
-            <>
-              <span className="text-gray-300">•</span>
-              <div className="flex items-center gap-1">
-                <GraduationCap className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="whitespace-nowrap">{job.experienceLevel}</span>
-              </div>
-            </>
+          {/* Maaş */}
+          {job.salary && (
+            <div className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-green-700">
+              <span>💰</span>
+              <span>{job.salary}</span>
+            </div>
           )}
         </div>
-
-        {/* Location */}
-        <div className="flex items-center gap-1 text-sm text-gray-700 mb-3">
-          <MapPin className="h-4 w-4 flex-shrink-0 text-gray-400" />
-          <span className="truncate" itemProp="jobLocation">{job.location}</span>
-        </div>
-
-        {/* Salary if exists */}
-        {job.salary && (
-          <div className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-sm font-medium mb-3">
-            <span>💰</span>
-            <span>{job.salary}</span>
-          </div>
-        )}
-
-        {/* Premium Badge */}
-        {isPremium && (
-          <div className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg text-xs font-semibold">
-            <span>👑</span>
-            <span>Premium İlan</span>
-          </div>
-        )}
       </div>
     </article>
   );
