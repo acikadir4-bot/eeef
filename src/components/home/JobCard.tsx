@@ -66,12 +66,12 @@ export function JobCard({ job, onDeleted }: JobCardProps) {
 
   return (
     <article
-      className="bg-white border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer py-3 px-4"
+      className="bg-white border-b border-gray-100 hover:bg-red-50 transition-colors cursor-pointer py-4 px-0"
       onClick={handleJobClick}
       itemScope
       itemType="https://schema.org/JobPosting"
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 px-4">
         {/* Company Logo - Küçültülmüş */}
         <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${logoColor} flex items-center justify-center flex-shrink-0`}>
           <span className="text-white font-semibold text-sm">{companyInitial}</span>
